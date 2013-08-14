@@ -1,0 +1,53 @@
+#!/bin/sh
+
+#
+# By Aldo Fabi 01-09-2006
+# LTP: 04-10-2006
+# alcir@gmail.com 14-08-2013
+#
+# Nagios zones Checker
+# it works also in a SmartOS GZ
+#
+
+### Begin vars
+MFS=${IFS}
+exit_code=0
+exit_text=""
+### End vars
+
+errors_checker(){
+
+        IFS="<LF>"
+        if [ ${exit_text} ]
+        then
+                exit_text=${exit_text}" $1"
+        else
+                exit_text="$1"
+        fi
+
+        if [ $2 -gt ${exit_code} ]
+        then
+                exit_code=$2
+        fi
+        IFS=$MFS
+}
+
+
+STATUS=`/usr/sbin/zoneadm list -ip`
+for ZONE in `echo ${STATUS}`
+do
+        ZID=`echo ${ZONE} | cut -d":" -f1`
+        ZNAME=`echo ${ZONE} | cut -d":" -f2`
+        ZALIAS=`vmadm list -p -o alias uuid=$ZNAME`
+        if [ $ZID -eq 0 ]; then ZALIAS="global"; fi
+        ZSTATE=`echo ${ZONE} | cut -d":" -f3`
+        if [ $ZSTATE = 'running' ]
+        then
+                errors_checker "OK: zone $ZALIAS is in running state" 0
+        else
+                errors_checker "CRITICAL: Zone $ZALIAS is in $ZSTATE state" 2
+        fi
+done
+
+echo ${exit_text}
+exit ${exit_code}
