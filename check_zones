@@ -3,21 +3,27 @@
 #
 # By Aldo Fabi 01-09-2006
 # LTP: 04-10-2006
-# alcir@gmail.com 14-08-2013
+# alcir@gmail.com from 14-08-2013
 #
 # Nagios zones Checker
-# it works also in a SmartOS GZ
 #
 
 ### Begin vars
 MFS=${IFS}
 exit_code=0
 exit_text=""
+workdir=$(cd `dirname $0` && pwd)
+excluded=$workdir/check_zones_excluded.txt
 ### End vars
+
+if [ ! -f $excluded ]
+then
+	touch $excluded
+fi
 
 errors_checker(){
 
-        IFS="<LF>"
+	IFS="<LF>"
         if [ ${exit_text} ]
         then
                 exit_text=${exit_text}" $1"
@@ -29,29 +35,37 @@ errors_checker(){
         then
                 exit_code=$2
         fi
-        IFS=$MFS
+	IFS=$MFS
 }
 
 
 STATUS=`/usr/sbin/zoneadm list -ip`
 for ZONE in `echo ${STATUS}`
 do
-        ZID=`echo ${ZONE} | cut -d":" -f1`
-        ZNAME=`echo ${ZONE} | cut -d":" -f2`
-        if [ "x$ZID" = "x0" ]
-        then
-                ZALIAS="global"
-        else
-                ZALIAS=`vmadm list -p -o alias uuid=$ZNAME`
-        fi
-        ZSTATE=`echo ${ZONE} | cut -d":" -f3`
-        if [ $ZSTATE = 'running' ]
-        then
-                errors_checker "OK: zone $ZALIAS is in running state" 0
-        else
-                errors_checker "CRITICAL: Zone $ZALIAS is in $ZSTATE state" 2
-        fi
+	ZID=`echo ${ZONE} | cut -d":" -f1`
+	ZNAME=`echo ${ZONE} | cut -d":" -f2`
 
+	grep $ZNAME $excluded 2>&1 >/dev/null
+	EL=$?
+
+	if [ $EL -eq 0 ]
+	then
+		continue
+	fi
+
+	if [ "x$ZID" = "x0" ]
+	then 
+   		ZALIAS="global"
+        else
+		ZALIAS=`vmadm list -p -o alias uuid=$ZNAME`
+	fi
+	ZSTATE=`echo ${ZONE} | cut -d":" -f3`
+	if [ $ZSTATE = 'running' ]
+	then
+		errors_checker "OK: zone $ZALIAS is in running state" 0
+	else
+		errors_checker "CRITICAL: Zone $ZALIAS is in $ZSTATE state" 2
+	fi
 done
 
 echo ${exit_text}
