@@ -1,0 +1,36 @@
+#!/bin/sh
+echo '<<<zones>>>'
+
+grep "Solaris 10" /etc/release 1>/dev/null 2>&1
+EL=$?
+
+if [ $EL -eq 0 ]
+then
+  solaris10=1
+else
+  smartos=1
+fi
+
+if [ $solaris10 ]
+then
+        STATUS=`zoneadm list -p`
+elif [ $smartos ]
+then
+        STATUS=`vmadm list -p`
+fi
+
+for ZONE in `echo ${STATUS}`
+do
+        ZID=`echo ${ZONE} | cut -d":" -f1`
+        if [ $solaris10 ]
+        then
+                ZALIAS=`echo ${ZONE} | cut -d":" -f2`
+                ZSTATE=`echo ${ZONE} | cut -d":" -f3`
+        elif [ $smartos ]
+        then
+                ZALIAS=`echo ${ZONE} | cut -d":" -f5`
+                ZSTATE=`echo ${ZONE} | cut -d":" -f4`
+        fi
+
+        echo "$ZALIAS $ZID $ZSTATE"
+done
