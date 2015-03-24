@@ -13,10 +13,10 @@ fi
 
 if [ $solaris10 ]
 then
-        STATUS=`zoneadm list -pi`
+        STATUS=`zoneadm list -pci`
 elif [ $smartos ]
 then
-        STATUS=`vmadm list -p`
+        STATUS=`vmadm list -pci`
 fi
 
 for ZONE in `echo ${STATUS}`
