@@ -1,0 +1,33 @@
+# the inventory function
+def inventory_zones(info):
+   # begin with empty inventory
+   inventory = []
+
+   # prova - installed 209e122c-7f70-457c-b88e-92bcae0b7147
+   # loop over all output lines of the agent
+   for line in info:
+      zonename = line[0]   # 
+      zonestatus = line[2]  # 
+      inventory.append( (zonename, None) )
+
+   return inventory
+
+
+# the check function
+def check_zones(item, params, info):
+
+   for line in info:
+        if line[0] == item:
+           zonename = line[0]
+           zonestatus = line[2]
+           if zonestatus != "running":
+                return (1, "Zone %s in status %s" % (zonename,zonestatus))
+           else:
+                return (0, "Zone %s in status %s" % (zonename,zonestatus))
+
+# declare the check to Check_MK
+check_info["zones"] = {
+    'check_function':            check_zones,
+    'inventory_function':        inventory_zones,
+    'service_description':       'Zone %s',
+}
