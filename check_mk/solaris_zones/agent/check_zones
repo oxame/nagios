@@ -13,7 +13,7 @@ fi
 
 if [ $solaris10 ]
 then
-        STATUS=`zoneadm list -p`
+        STATUS=`zoneadm list -pi`
 elif [ $smartos ]
 then
         STATUS=`vmadm list -p`
