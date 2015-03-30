@@ -1,6 +1,8 @@
 #!/bin/sh
 echo '<<<zones>>>'
 
+EXCLUDED=""
+
 grep "Solaris 10" /etc/release 1>/dev/null 2>&1
 EL=$?
 
@@ -32,5 +34,12 @@ do
                 ZSTATE=`echo ${ZONE} | cut -d":" -f4`
         fi
 
+        echo $EXCLUDED | grep $ZALIAS 1>/dev/null 2>&1
+        if [ $? -eq 0 ]
+        then
+                break
+        fi
+        
         echo "$ZALIAS $ZID $ZSTATE"
+        
 done
