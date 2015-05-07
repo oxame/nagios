@@ -18,10 +18,11 @@ then
         STATUS=`zoneadm list -pci`
 elif [ $smartos ]
 then
-        STATUS=`vmadm list -pci`
+        STATUS=`vmadm list -p`
 fi
 
-for ZONE in `echo ${STATUS}`
+#for ZONE in "${STATUS}"
+echo "${STATUS}" | while read ZONE
 do
         ZID=`echo ${ZONE} | cut -d":" -f1`
         if [ $solaris10 ]
@@ -39,7 +40,7 @@ do
         then
                 break
         fi
-        
+
         echo "$ZALIAS $ZID $ZSTATE"
-        
+
 done
