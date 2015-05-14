@@ -38,7 +38,7 @@ do
         echo $EXCLUDED | grep -w $ZALIAS 1>/dev/null 2>&1
         if [ $? -eq 0 ]
         then
-                break
+                continue
         fi
 
         echo "$ZALIAS $ZID $ZSTATE"
