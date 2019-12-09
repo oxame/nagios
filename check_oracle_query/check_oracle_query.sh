@@ -91,6 +91,7 @@ while [ $# -gt 0 ]; do
         -q)
             query=$2
             shift 2
+            ;;
         -q)
             query=$2
             shift 2
